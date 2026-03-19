@@ -2,17 +2,17 @@
 
 A zero-dependency Node.js proxy that distributes outbound traffic across multiple network interfaces (e.g. Wi-Fi + Ethernet + USB tethering) using round-robin load balancing, with automatic interface discovery, health monitoring, and a real-time dashboard.
 
-![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)
-![Platform](https://img.shields.io/badge/Platform-Windows-0078D4?logo=windows&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-f0c040)
-![Dependencies](https://img.shields.io/badge/Dependencies-None-brightgreen)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Platform](https://img.shields.io/badge/Platform-Windows-0078D4?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
+[![License](https://img.shields.io/badge/License-MIT-f0c040)](LICENSE)
+[![Dependencies](https://img.shields.io/badge/Dependencies-None-brightgreen)](package.json)
 
 ---
 
 ## Features
 
 - **Automatic interface discovery**  detects all active IPv4 interfaces on startup and at runtime; no manual IP configuration required
-- **Round-robin load balancing** distributes connections evenly across all healthy interfaces (50/50, 33/33/33, etc. — scales automatically with interface count)
+- **Round-robin load balancing** distributes connections evenly across all healthy interfaces (50/50, 33/33/33, etc. -scales automatically with interface count)
 - **Automatic failover** unhealthy interfaces are excluded from the pool; traffic resumes through them automatically upon recovery
 - **Full byte tracking** accurately measures throughput for both HTTP and HTTPS (CONNECT tunnel) traffic in both upload and download directions
 - **Real-time dashboard** per-interface bandwidth graphs, speed readout in KB/s, MB/s, or Mbps, request counts, and cumulative data totals
@@ -74,7 +74,7 @@ Proxy:     http://127.0.0.1:8080
 Dashboard: http://127.0.0.1:3000
 ```
 
-### 3. Configure the system proxy — PowerShell
+### 3. Configure the system proxy -PowerShell
 
 ```powershell
 $reg = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
@@ -113,7 +113,7 @@ The proxy binds to `0.0.0.0`, making it reachable from any device on the same lo
 
 Settings → Network & Internet → Mobile Hotspot → On
 
-**2. Allow inbound connections on port 8080 — PowerShell (Administrator)**
+**2. Allow inbound connections on port 8080 -PowerShell (Administrator)**
 
 ```powershell
 New-NetFirewallRule -DisplayName "ISP Load Balancer" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow
@@ -205,7 +205,7 @@ const CONFIG = {
 | Bandwidth aggregation for a single TCP connection | ❌ |
 | Intercepting traffic from apps that bypass system proxy | ❌ |
 
-> Single-connection bandwidth cannot be aggregated at the application layer. Each new connection is assigned to the next interface in the pool. The throughput benefit is realized across multiple concurrent connections — for example, a browser opening many parallel requests, or a download manager with multiple threads.
+> Single-connection bandwidth cannot be aggregated at the application layer. Each new connection is assigned to the next interface in the pool. The throughput benefit is realized across multiple concurrent connections -for example, a browser opening many parallel requests, or a download manager with multiple threads.
 
 ---
 
@@ -234,4 +234,4 @@ Contributions are welcome. Some areas for improvement:
 
 ## License
 
-MIT — free to use, modify, and distribute.
+MIT -free to use, modify, and distribute.
