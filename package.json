@@ -1,0 +1,12 @@
+{
+  "name": "isp-load-balancer",
+  "version": "1.0.0",
+  "description": "Zero-dependency Node.js proxy for multi-ISP load balancing with auto-detection, failover, and live dashboard",
+  "main": "proxy.js",
+  "scripts": {
+    "start": "node proxy.js"
+  },
+  "keywords": ["load-balancer", "dual-wan", "proxy", "multi-isp", "networking", "windows"],
+  "author": "",
+  "license": "MIT"
+}
