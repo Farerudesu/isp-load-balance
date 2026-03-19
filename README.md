@@ -11,13 +11,13 @@ A zero-dependency Node.js proxy that distributes outbound traffic across multipl
 
 ## Features
 
-- **Automatic interface discovery** — detects all active IPv4 interfaces on startup and at runtime; no manual IP configuration required
-- **Round-robin load balancing** — distributes connections evenly across all healthy interfaces (50/50, 33/33/33, etc. — scales automatically with interface count)
-- **Automatic failover** — unhealthy interfaces are excluded from the pool; traffic resumes through them automatically upon recovery
-- **Full byte tracking** — accurately measures throughput for both HTTP and HTTPS (CONNECT tunnel) traffic in both upload and download directions
-- **Real-time dashboard** — per-interface bandwidth graphs, speed readout in KB/s, MB/s, or Mbps, request counts, and cumulative data totals
-- **Hotspot-compatible** — binds to `0.0.0.0`, allowing mobile devices connected via Windows Mobile Hotspot to route traffic through the proxy
-- **Zero dependencies** — built entirely on Node.js built-in modules (`http`, `net`, `os`, `url`)
+- **Automatic interface discovery**  detects all active IPv4 interfaces on startup and at runtime; no manual IP configuration required
+- **Round-robin load balancing** distributes connections evenly across all healthy interfaces (50/50, 33/33/33, etc. — scales automatically with interface count)
+- **Automatic failover** unhealthy interfaces are excluded from the pool; traffic resumes through them automatically upon recovery
+- **Full byte tracking** accurately measures throughput for both HTTP and HTTPS (CONNECT tunnel) traffic in both upload and download directions
+- **Real-time dashboard** per-interface bandwidth graphs, speed readout in KB/s, MB/s, or Mbps, request counts, and cumulative data totals
+- **Hotspot-compatible** binds to `0.0.0.0`, allowing mobile devices connected via Windows Mobile Hotspot to route traffic through the proxy
+- **Zero dependencies** built entirely on Node.js built-in modules (`http`, `net`, `os`, `url`)
 
 ---
 
@@ -32,8 +32,8 @@ A zero-dependency Node.js proxy that distributes outbound traffic across multipl
 ## Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/isp-load-balancer.git
-cd isp-load-balancer
+git clone https://github.com/Farerudesu/isp-load-balance.git
+cd isp-load-balance
 ```
 
 No `npm install` required.
@@ -42,7 +42,7 @@ No `npm install` required.
 
 ## Quick Start
 
-### 1. Equalize interface metrics — PowerShell (Administrator)
+### 1. Equalize interface metrics - PowerShell (Administrator)
 
 Prevents Windows from routing all traffic through a single preferred interface:
 
@@ -56,6 +56,7 @@ To list all interface names on your system:
 ```powershell
 Get-NetIPInterface -AddressFamily IPv4 | Select InterfaceAlias, InterfaceMetric
 ```
+Alternatively use Properties panel on Network Settings in Control Panel
 
 ### 2. Start the proxy
 
@@ -87,6 +88,8 @@ To disable:
 Set-ItemProperty $reg ProxyEnable -Value 0
 ```
 
+Alternatively change Proxy within the system settings on Windows 
+
 ### 4. Open the dashboard
 
 ```
@@ -97,15 +100,8 @@ http://127.0.0.1:3000
 
 ## Dashboard
 
-The dashboard updates every second and provides a live view of all detected interfaces.
+<img width="1918" height="826" alt="image" src="https://github.com/user-attachments/assets/5b7c72cb-3da7-4d0a-b9f4-2a61a4eaa81e" />
 
-| Element | Description |
-|---|---|
-| Interface card | Name, IP address, online/offline status |
-| Bandwidth graph | Rolling 60-second throughput history per interface |
-| Speed display | Current throughput — toggle between KB/s, MB/s, and Mbps |
-| Distribution bar | Visual representation of request share per interface |
-| Total card | Aggregate request count, combined speed, and total data transferred |
 
 ---
 
@@ -129,7 +125,7 @@ New-NetFirewallRule -DisplayName "ISP Load Balancer" -Direction Inbound -Protoco
 ipconfig
 ```
 
-Look for the `Local Area Connection*` adapter — the IPv4 address is typically `192.168.137.1`.
+Look for the `Local Area Connection*` adapter - the IPv4 address is typically `192.168.137.1`.
 
 **4. Configure the proxy on the mobile device**
 
