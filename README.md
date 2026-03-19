@@ -1,73 +1,79 @@
-# 🌐 ISP Load Balancer
+# ISP Load Balancer
 
-A lightweight Node.js proxy that automatically load balances traffic across multiple network interfaces (e.g. WiFi + Ethernet) on Windows — with **auto-detection**, **50:50 round-robin**, **auto-failover**, and a **live dashboard**.
+A zero-dependency Node.js proxy that distributes outbound traffic across multiple network interfaces (e.g. Wi-Fi + Ethernet + USB tethering) using round-robin load balancing, with automatic interface discovery, health monitoring, and a real-time dashboard.
 
-> No third-party dependencies. Pure Node.js built-ins only.
-
-![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?logo=node.js)
-![Platform](https://img.shields.io/badge/Platform-Windows-blue?logo=windows)
-![License](https://img.shields.io/badge/License-MIT-yellow)
-
----
-
-## ✨ Features
-
-- **Auto-detect interfaces** — no need to hardcode IPs, scans all active network interfaces automatically
-- **50:50 round-robin** — distributes requests evenly across all online interfaces
-- **Auto-failover** — if one ISP goes down, all traffic automatically routes to the remaining ones
-- **Health checks** — pings each interface every 8 seconds to detect connectivity changes
-- **Live dashboard** — real-time monitoring of requests and data per interface
-- **HTTPS support** — handles CONNECT tunneling for HTTPS traffic
-- **Zero dependencies** — uses only Node.js built-in modules (`http`, `net`, `os`, `url`)
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Windows-0078D4?logo=windows&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-f0c040)
+![Dependencies](https://img.shields.io/badge/Dependencies-None-brightgreen)
 
 ---
 
-## 📋 Requirements
+## Features
+
+- **Automatic interface discovery** — detects all active IPv4 interfaces on startup and at runtime; no manual IP configuration required
+- **Round-robin load balancing** — distributes connections evenly across all healthy interfaces (50/50, 33/33/33, etc. — scales automatically with interface count)
+- **Automatic failover** — unhealthy interfaces are excluded from the pool; traffic resumes through them automatically upon recovery
+- **Full byte tracking** — accurately measures throughput for both HTTP and HTTPS (CONNECT tunnel) traffic in both upload and download directions
+- **Real-time dashboard** — per-interface bandwidth graphs, speed readout in KB/s, MB/s, or Mbps, request counts, and cumulative data totals
+- **Hotspot-compatible** — binds to `0.0.0.0`, allowing mobile devices connected via Windows Mobile Hotspot to route traffic through the proxy
+- **Zero dependencies** — built entirely on Node.js built-in modules (`http`, `net`, `os`, `url`)
+
+---
+
+## Requirements
 
 - [Node.js](https://nodejs.org) v18 or higher
-- Windows 10/11
-- Two or more active network interfaces (e.g. WiFi + Ethernet/USB tethering)
+- Windows 10 or Windows 11
+- Two or more active network interfaces connected to different ISPs
 
 ---
 
-## 🚀 Quick Start
-
-### 1. Clone the repo
+## Installation
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/isp-load-balancer.git
 cd isp-load-balancer
 ```
 
-### 2. Set equal metric on both interfaces (PowerShell as Admin)
+No `npm install` required.
 
-This ensures Windows doesn't prefer one interface over the other:
+---
+
+## Quick Start
+
+### 1. Equalize interface metrics — PowerShell (Administrator)
+
+Prevents Windows from routing all traffic through a single preferred interface:
 
 ```powershell
 Set-NetIPInterface -InterfaceAlias "Wi-Fi" -InterfaceMetric 10
 Set-NetIPInterface -InterfaceAlias "Ethernet 8" -InterfaceMetric 10
 ```
 
-> Replace interface names with yours. Run `Get-NetIPInterface` to see all interface names.
+To list all interface names on your system:
 
-### 3. Run the proxy
+```powershell
+Get-NetIPInterface -AddressFamily IPv4 | Select InterfaceAlias, InterfaceMetric
+```
+
+### 2. Start the proxy
 
 ```bash
 node proxy.js
 ```
 
-You should see:
+Expected output:
+
 ```
-[Scan] Interface baru ditemukan: Wi-Fi (192.168.3.196)
-[Scan] Interface baru ditemukan: Ethernet 8 (192.168.30.70)
-[Health] 2/2 interface online: Wi-Fi(192.168.3.196), Ethernet 8(192.168.30.70)
-✅ Proxy running at http://127.0.0.1:8080
-📊 Dashboard at http://127.0.0.1:3000
+[Scan] New interface detected: Wi-Fi (192.168.3.196)
+[Scan] New interface detected: Ethernet 8 (192.168.30.70)
+[Health] 2/2 active: Wi-Fi(192.168.3.196), Ethernet 8(192.168.30.70)
+Proxy:     http://127.0.0.1:8080
+Dashboard: http://127.0.0.1:3000
 ```
 
-### 4. Set Windows system proxy
-
-Run in PowerShell (no admin required):
+### 3. Configure the system proxy — PowerShell
 
 ```powershell
 $reg = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
@@ -75,14 +81,13 @@ Set-ItemProperty $reg ProxyEnable -Value 1
 Set-ItemProperty $reg ProxyServer -Value "127.0.0.1:8080"
 ```
 
-To disable the proxy later:
+To disable:
 
 ```powershell
-$reg = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 Set-ItemProperty $reg ProxyEnable -Value 0
 ```
 
-### 5. Open the dashboard
+### 4. Open the dashboard
 
 ```
 http://127.0.0.1:3000
@@ -90,101 +95,147 @@ http://127.0.0.1:3000
 
 ---
 
-## 📊 Dashboard
+## Dashboard
 
-The live dashboard shows:
+The dashboard updates every second and provides a live view of all detected interfaces.
 
-- All detected network interfaces with their IP
-- Online/Offline status per interface (updated every 2s)
-- Request count and data transferred per interface
-- Visual distribution bar showing the load split
-- Total requests and data across all interfaces
+| Element | Description |
+|---|---|
+| Interface card | Name, IP address, online/offline status |
+| Bandwidth graph | Rolling 60-second throughput history per interface |
+| Speed display | Current throughput — toggle between KB/s, MB/s, and Mbps |
+| Distribution bar | Visual representation of request share per interface |
+| Total card | Aggregate request count, combined speed, and total data transferred |
 
 ---
 
-## ⚙️ Configuration
+## Mobile Hotspot Support
 
-Edit the `CONFIG` object at the top of `proxy.js`:
+The proxy binds to `0.0.0.0`, making it reachable from any device on the same local network, including devices connected via Windows Mobile Hotspot.
+
+**1. Enable Windows Mobile Hotspot**
+
+Settings → Network & Internet → Mobile Hotspot → On
+
+**2. Allow inbound connections on port 8080 — PowerShell (Administrator)**
+
+```powershell
+New-NetFirewallRule -DisplayName "ISP Load Balancer" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow
+```
+
+**3. Find the hotspot gateway IP**
+
+```powershell
+ipconfig
+```
+
+Look for the `Local Area Connection*` adapter — the IPv4 address is typically `192.168.137.1`.
+
+**4. Configure the proxy on the mobile device**
+
+In the device's Wi-Fi advanced settings, set a manual proxy:
+
+- **Host:** `192.168.137.1`
+- **Port:** `8080`
+
+All traffic from the mobile device will be load balanced across the PC's network interfaces.
+
+---
+
+## Configuration
+
+All options are in the `CONFIG` object at the top of `proxy.js`:
 
 ```js
 const CONFIG = {
-  PROXY_PORT: 8080,        // Port for the proxy server
-  DASHBOARD_PORT: 3000,    // Port for the dashboard UI
-  CHECK_INTERVAL: 8000,    // Health check interval in ms
-  CHECK_HOST: 'www.gstatic.com', // Host used for connectivity checks
+  PROXY_PORT: 8080,
+  DASHBOARD_PORT: 3000,
+  CHECK_INTERVAL: 8000,
+  CHECK_HOST: 'www.gstatic.com',
 };
 ```
 
----
-
-## 🔧 How It Works
-
-```
-┌─────────────┐     HTTP/HTTPS      ┌──────────────────────┐
-│   Browser   │ ──────────────────► │  Proxy (port 8080)   │
-│  or App     │                     │                      │
-└─────────────┘                     │  Round-robin picker  │
-                                    │  ┌────────────────┐  │
-                                    │  │ Interface pool │  │
-                                    │  │  WiFi   ✅     │  │
-                                    │  │  Eth    ✅     │  │
-                                    │  └────────────────┘  │
-                                    └──────┬───────────────┘
-                                           │
-                              ┌────────────┴────────────┐
-                              ▼                         ▼
-                         via WiFi IP              via Ethernet IP
-                       (192.168.x.x)             (192.168.x.x)
-                              │                         │
-                              ▼                         ▼
-                           ISP 1                     ISP 2
-```
-
-1. On startup, scans all non-loopback IPv4 interfaces via `os.networkInterfaces()`
-2. Performs a health check on each by making an HTTP request bound to that interface's local IP
-3. Only interfaces that successfully reach the internet are added to the pool
-4. Incoming proxy requests are distributed round-robin across all healthy interfaces
-5. Every 8 seconds, re-scans and re-checks — handles IP changes and new connections automatically
+| Option | Default | Description |
+|---|---|---|
+| `PROXY_PORT` | `8080` | Port the proxy server listens on |
+| `DASHBOARD_PORT` | `3000` | Port the dashboard UI listens on |
+| `CHECK_INTERVAL` | `8000` | Interval in ms between health checks and interface rescans |
+| `CHECK_HOST` | `www.gstatic.com` | Host used to verify internet reachability per interface |
 
 ---
 
-## ⚠️ Limitations
+## Architecture
 
-| Feature | Supported |
+```
+┌──────────────────┐        ┌───────────────────────────┐
+│  Browser / App   │──────▶ │   Proxy  (0.0.0.0:8080)  │
+│  Mobile Device   │        │                           │
+└──────────────────┘        │     Round-robin pool      │
+                            │  ┌─────────────────────┐  │
+                            │  │  Wi-Fi       ✓      │  │
+                            │  │  Ethernet    ✓      │  │
+                            │  │  USB Tether  ✓      │  │
+                            │  └─────────────────────┘  │
+                            └───────────┬───────────────┘
+                                        │
+                           ┌────────────┴────────────┐
+                           ▼                         ▼
+                      via Wi-Fi IP           via Ethernet IP
+                           │                         │
+                           ▼                         ▼
+                         ISP 1                     ISP 2
+```
+
+**Request lifecycle:**
+
+1. `os.networkInterfaces()` enumerates all non-loopback IPv4 interfaces on startup
+2. Each interface is health-checked by binding an HTTP request to its local IP address
+3. Interfaces that successfully reach `CHECK_HOST` are added to the active pool
+4. Incoming proxy requests are assigned round-robin to the next available interface
+5. Every `CHECK_INTERVAL` ms, the interface list is rescanned and all health checks repeat
+6. HTTPS traffic uses the HTTP CONNECT method; byte counters track data in both directions per connection
+
+---
+
+## Limitations
+
+| Capability | Supported |
 |---|---|
-| Load balance HTTP/HTTPS from browser | ✅ |
-| Auto-detect new interfaces at runtime | ✅ |
-| Auto-failover when ISP goes down | ✅ |
-| Aggregate bandwidth for a single connection | ❌ |
-| Redirect traffic from apps that ignore system proxy | ❌ |
+| Load balance HTTP and HTTPS traffic | ✅ |
+| Automatic interface discovery at runtime | ✅ |
+| Automatic failover and recovery | ✅ |
+| Support for 3+ interfaces with auto-adjusted ratio | ✅ |
+| Mobile device support via hotspot | ✅ |
+| Bandwidth aggregation for a single TCP connection | ❌ |
+| Intercepting traffic from apps that bypass system proxy | ❌ |
 
-> **Note:** This is an application-layer proxy. It cannot aggregate bandwidth for a single TCP connection (e.g. one file download won't use both ISPs at once). The benefit is across multiple connections — each new request goes to the next ISP in the pool.
+> Single-connection bandwidth cannot be aggregated at the application layer. Each new connection is assigned to the next interface in the pool. The throughput benefit is realized across multiple concurrent connections — for example, a browser opening many parallel requests, or a download manager with multiple threads.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 isp-load-balancer/
-├── proxy.js        # Main proxy + dashboard server
+├── proxy.js        # Proxy server, health monitor, and dashboard
 ├── package.json    # Project metadata
 └── README.md       # Documentation
 ```
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Pull requests are welcome! Some ideas:
+Contributions are welcome. Some areas for improvement:
 
-- [ ] Weighted load balancing (e.g. 70:30 based on speed)
-- [ ] Per-app routing rules
-- [ ] Windows startup / auto-run as service
-- [ ] JSON config file support
-- [ ] Bandwidth speed test per interface
+- [ ] JSON-based external configuration file
+- [ ] Per-application routing rules
+- [ ] Windows startup service integration
+- [ ] Automated speed detection for dynamic interface weighting
+- [ ] Traffic statistics export to CSV
 
 ---
 
-## 📄 License
+## License
 
 MIT — free to use, modify, and distribute.
